@@ -1,0 +1,7 @@
+{
+	"default-exports": {
+		"csv": { "demiliter": "," }
+	},
+	"associate": {},
+	"file": {}
+}
