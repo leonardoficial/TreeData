@@ -2,6 +2,8 @@
 	"default-exports": {
 		"csv": { "demiliter": "," }
 	},
-	"associate": {},
+	"associate": {
+		"^SRECORD.*TXT$": "SRECORD.json"
+	},
 	"file": {}
 }

@@ -713,7 +713,7 @@ class StructureLayout(Structure):
 
         # Layout apropriado.
         self.layout = self.middleware.layout(self.layout_name, self.parameters)
-
+        
         # Palavra-Chave do registro no layout.
         self.layout_keyword = record_settings.get('ID-prefix')
         
@@ -752,7 +752,7 @@ class StructureLayout(Structure):
         
         
     # Função criadora de registros.
-    def add(record_keyword, looping_vector, runtime_settings=None):
+    def add(self, record_keyword, looping_vector, runtime_settings=None):
             
         # Layout específico do registro.
         record_layout = self.layout.records[record_keyword]
@@ -765,6 +765,9 @@ class StructureLayout(Structure):
 
         # Extração do vetor de códigos do registro catalogado.
         record_vector = looping_vector[0: offset]
+
+        # Tamanho total do vetor de códigos extraído.
+        vector_length = len(self.link.handler)
 
         # FEATURE-IMPROVE (Testes de uma parada ai. Vou consertar logo mais).
         if runtime_settings:
@@ -812,7 +815,7 @@ class StructureLayout(Structure):
             field.clss = RecordLayout.DATA_TYPE
 
             # FEATURE-IMPROVE (Template de formatação do dado).
-            field.template = field_layout['template']
+            field.template = field_layout.get('template', "")
                 
             # Permite que o Middleware realize tratativas no campo criado.
             field = self.parameters.standardize_field(field, settings={
@@ -864,7 +867,7 @@ class StructureLayout(Structure):
         looping_vector = self.link.handler
 
         # Tamanho total do vetor de códigos extraído.
-        vector_length = len(self.link.handler)
+        vector_length = len(self.link.handler)        
 
         # Para cada registro.
         while True:
@@ -899,6 +902,10 @@ class StructureLayout(Structure):
                 
             # FEATURE-IMPROVE (Caso o registro não esteja conforme o layout).
             else:
+
+                # TAGGED
+                break
+                return None
 
                 # Em caso de erros controlados.
                 if record_settings.get('on-error', False):
