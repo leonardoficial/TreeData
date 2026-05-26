@@ -86,9 +86,10 @@ class Structure:
 
         # Configuração dos callbacks.
         self._callback_progress = callback
-
+        
+        # TAGGED-OLD
         # Inicializa o processamento de dados.
-        if settings.get('initialize', True):
+        if settings.get('--initialize', False):
 
             # Mensagem de suporte.
             self.logger.debug("Início da criação do objeto TreeData!")
@@ -318,6 +319,9 @@ class StructureConfigParser(Structure):
        
         # Invoca o inicializador da classe principal.
         Structure.__init__(self, *args, **kwargs)
+        
+        # Inicializa o processamento dos registros.
+        self.initialize()
 
         return None
 
@@ -433,6 +437,9 @@ class StructureTable(Structure):
        
         # Invoca o inicializador da classe principal.
         Structure.__init__(self, *args, **kwargs)
+        
+        # Inicializa o processamento dos registros.
+        self.initialize()
 
         return None
 
@@ -544,7 +551,10 @@ class StructureJSON(Structure):
         
         # Invoca o inicializador da classe principal.
         Structure.__init__(self, *args, **kwargs)
-
+        
+        # Inicializa o processamento dos registros.
+        self.initialize()
+        
         return None
 
 
@@ -715,7 +725,10 @@ class StructureLayout(Structure):
         
         # Indica os bytes iniciais a serem ignorados.
         self.skip_first_bytes = record_settings.get('skip-first-bytes', 0)
-
+        
+        # Inicializa o processamento dos registros.
+        self.initialize()
+        
         return None
 
 
