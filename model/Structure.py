@@ -749,8 +749,107 @@ class StructureLayout(Structure):
             self.link.handler.extend(record.vector)
 
         return True
-
         
+        
+    # Função criadora de registros.
+    def add(record_keyword, looping_vector, runtime_settings=None):
+            
+        # Layout específico do registro.
+        record_layout = self.layout.records[record_keyword]
+
+        # Indica até onde deve ser cortado o vetor de códigos.
+        record_offset = record_layout['offset']
+            
+        # Offset total do vetor de códigos.
+        offset = record_offset + self.record_extra_offset
+
+        # Extração do vetor de códigos do registro catalogado.
+        record_vector = looping_vector[0: offset]
+
+        # FEATURE-IMPROVE (Testes de uma parada ai. Vou consertar logo mais).
+        if runtime_settings:
+
+            # O registro consome TODO o vetor de códigos para encerrar o looping nesta iteração.
+            record_vector = looping_vector[:]
+
+        # Delega a criação do registro.
+        record = RecordLayout(record_vector, record_layout, self.parameters, runtime_settings)
+
+        # Permite que o Middleware realize tratativas no registro antes do preenchimento.
+        record = self.parameters.pre_standardize_record(record)
+            
+        # Vetor contendo o código dos campos a serem usados pelos campos.
+        working_vector = looping_vector[self.skip_first_bytes:] 
+            
+        # Para cada campo catalogado no layout.
+        for name in record.layout['fields']:
+
+            # Layout do campo.
+            field_layout = record.layout['fields'][name]
+
+            # Indica até onde deve ser cortado o vetor de códigos.
+            field_bytes = field_layout['bytes']
+
+            # Vetor de códigos do campo catalogado.
+            field_vector = working_vector[:field_bytes]
+
+            # FEATURE-IMPROVE (Testes de uma parada ai. Vou consertar logo mais).
+            if runtime_settings:
+
+                # O campo consome TODO o vetor de códigos do registro para encerrar o looping nesta iteração.
+                field_vector = working_vector[:]
+
+            # Delega a criação do campo.
+            field = FieldLayout(record, field_vector, field_layout, self.parameters, runtime_settings)
+
+            # Nome associado no layout.
+            field.name = field_layout['name']
+
+            # Tipo de dado.
+            field.type = field_layout['type']
+        
+            # Classe do dado.
+            field.clss = RecordLayout.DATA_TYPE
+
+            # FEATURE-IMPROVE (Template de formatação do dado).
+            field.template = field_layout['template']
+                
+            # Permite que o Middleware realize tratativas no campo criado.
+            field = self.parameters.standardize_field(field, settings={
+                'record': record
+            })
+
+            # Adiciona o campo criado ao controle.
+            record.fields[name] = field
+
+            # Adiciona referência as variáveis auxiliares.
+            record.fields_names[field.name] = field
+
+            # Chave estrangeira.
+            if field.foreign_key:
+
+                # Adiciona ao controle
+                record.fields_foreign_keys[field.foreign_key] = field
+
+            # Remove o código trabalhado do vetor para continuar a recursão.
+            working_vector = working_vector[field_bytes:]
+
+        # Informa o progresso da criação dos registros.
+        self.callback_progress({
+            "total": vector_length,
+            "value": vector_length - len(looping_vector)
+        })
+
+        # Permite que o Middleware realize tratativas no registro criado.
+        self.parameters.post_standardize_record(record)
+
+        # Mapeia as referências nos controles internos.
+        self.map_references(record)
+
+        # Remove o código trabalhado do vetor.
+        return looping_vector[offset:]
+
+
     def initialize(self):
         """
         Starts the required processes of the life-cycle boot.
@@ -766,104 +865,6 @@ class StructureLayout(Structure):
 
         # Tamanho total do vetor de códigos extraído.
         vector_length = len(self.link.handler)
-
-        # Função recursiva criadora de registros.
-        def build(record_keyword, looping_vector, runtime_settings=None):
-            
-            # Layout específico do registro.
-            record_layout = self.layout.records[record_keyword]
-
-            # Indica até onde deve ser cortado o vetor de códigos.
-            record_offset = record_layout['offset']
-            
-            # Offset total do vetor de códigos.
-            offset = record_offset + self.record_extra_offset
-
-            # Extração do vetor de códigos do registro catalogado.
-            record_vector = looping_vector[0: offset]
-
-            # FEATURE-IMPROVE (Testes de uma parada ai. Vou consertar logo mais).
-            if runtime_settings:
-
-                # O registro consome TODO o vetor de códigos para encerrar o looping nesta iteração.
-                record_vector = looping_vector[:]
-
-            # Delega a criação do registro.
-            record = RecordLayout(record_vector, record_layout, self.parameters, runtime_settings)
-
-            # Permite que o Middleware realize tratativas no registro antes do preenchimento.
-            record = self.parameters.pre_standardize_record(record)
-            
-            # Vetor contendo o código dos campos a serem usados pelos campos.
-            working_vector = looping_vector[self.skip_first_bytes:] 
-            
-            # Para cada campo catalogado no layout.
-            for name in record.layout['fields']:
-
-                # Layout do campo.
-                field_layout = record.layout['fields'][name]
-
-                # Indica até onde deve ser cortado o vetor de códigos.
-                field_bytes = field_layout['bytes']
-
-                # Vetor de códigos do campo catalogado.
-                field_vector = working_vector[:field_bytes]
-
-                # FEATURE-IMPROVE (Testes de uma parada ai. Vou consertar logo mais).
-                if runtime_settings:
-
-                    # O campo consome TODO o vetor de códigos do registro para encerrar o looping nesta iteração.
-                    field_vector = working_vector[:]
-
-                # Delega a criação do campo.
-                field = FieldLayout(record, field_vector, field_layout, self.parameters, runtime_settings)
-
-                # Nome associado no layout.
-                field.name = field_layout['name']
-
-                # Tipo de dado.
-                field.type = field_layout['type']
-        
-                # Classe do dado.
-                field.clss = RecordLayout.DATA_TYPE
-
-                # FEATURE-IMPROVE (Template de formatação do dado).
-                field.template = field_layout['template']
-                
-                # Permite que o Middleware realize tratativas no campo criado.
-                field = self.parameters.standardize_field(field, settings={
-                    'record': record
-                })
-
-                # Adiciona o campo criado ao controle.
-                record.fields[name] = field
-
-                # Adiciona referência as variáveis auxiliares.
-                record.fields_names[field.name] = field
-
-                # Chave estrangeira.
-                if field.foreign_key:
-
-                    # Adiciona ao controle
-                    record.fields_foreign_keys[field.foreign_key] = field
-
-                # Remove o código trabalhado do vetor para continuar a recursão.
-                working_vector = working_vector[field_bytes:]
-
-            # Informa o progresso da criação dos registros.
-            self.callback_progress({
-                "total": vector_length,
-                "value": vector_length - len(looping_vector)
-            })
-
-            # Permite que o Middleware realize tratativas no registro criado.
-            self.parameters.post_standardize_record(record)
-
-            # Mapeia as referências nos controles internos.
-            self.map_references(record)
-
-            # Remove o código trabalhado do vetor para continuar a recursão.
-            return looping_vector[offset:]
 
         # Para cada registro.
         while True:
@@ -894,7 +895,7 @@ class StructureLayout(Structure):
             if record_keyword in self.layout.records:
 
                 # Função recursiva.
-                looping_vector = build(record_keyword, looping_vector)
+                looping_vector = self.add(record_keyword, looping_vector)
                 
             # FEATURE-IMPROVE (Caso o registro não esteja conforme o layout).
             else:
@@ -919,7 +920,7 @@ class StructureLayout(Structure):
                         runtime_settings = dict(fields={ 'dynamic-offeset': record_tobytes })
 
                     # Constrói o registro de erro.
-                    looping_vector = build(record_keyword, looping_vector, runtime_settings)
+                    looping_vector = self.add(record_keyword, looping_vector, runtime_settings)
 
                 # Em caso de erros não controlados.
                 else:
