@@ -122,6 +122,9 @@ class TreeData:
         
         # Configurações da aplicação.
         settings = {
+            "default-exports": {
+            		"csv": { "demiliter": "," }
+            	},
             "paths": {
                 "icons":        r"controller\icons",
                 "tasks":	r"controller\tasks",
