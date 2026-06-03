@@ -648,6 +648,21 @@ class StructureJSON(Structure):
         return None
 
 
+    # Função criadora de registros.
+    def add(self, record_keyword, looping_vector, runtime_settings=None):
+        """
+        Process and adds record to <TreeData.Structure> from data.
+        
+        PARAMETER 1: record_keyword: Unique record identifier.
+        PARAMETER 2: looping_vector: Vector of data to be processed.
+        PARAMETER 3: runtime_settings: Custom settings.
+        
+        RETURNS: <List> Remaining unprocessed data.
+        """
+
+        return None
+
+
     def save(self):
         """
         Updates the <TreeData.Structure> while iterating over it's records.
