@@ -338,18 +338,19 @@ class Layout(object):
         # Caminho absoluto para o arquivo do layout solicitado.
         layout_path = os.path.join(path, name)
 
-        print(layout_path)
-
         # Verifica a existência do arquivo de layout.
         if not os.path.exists(layout_path):
             
             return None
 
+        # Regras de configuração do campo.
+        field_settings = self.parameters.rules['link']['settings'].get("field", {})
+
         # Expressão regular utilizada para localizar os campos.
-        field_regex = self.parameters.rules['link']['settings'].get("field", {}).get("ID-regex")
+        field_regex = field_settings.get("ID-regex")
 
         # Compila a expressão regular.
-        field_regex = re.compile(field_regex)
+        field_regex = re.compile(field_regex, re.IGNORECASE)
 
         # Processo de parse dos dados do arquivo.
         self.parser = ConfigParser(interpolation=None)
@@ -378,7 +379,7 @@ class Layout(object):
                     try:
 
                         # Nome das variáveis do campo de acordo com o layout.
-                        variables_name = self.parameters.rules['link']['settings']["field"].get("variables")
+                        variables_name = field_settings.get("variables")
                         
                         # Valores das variáveis de configuração do campo.
                         variables_data = shlex.split(field_data)

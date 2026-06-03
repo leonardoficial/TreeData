@@ -1,4 +1,8 @@
 {
 	"associate": {},
+	"default-exports": {},
+	"associate": {
+		"^SRECORD.*TXT$": "SRECORD.json"
+	},
 	"file": {}
 }

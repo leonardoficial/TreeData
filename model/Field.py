@@ -85,6 +85,8 @@ class Field:
         # Inicializa a criação do campo.
         self.initialize()
 
+        return None
+
 
     def initialize(self):
         """
@@ -433,7 +435,7 @@ class FieldLayout(Field):
 
         # O valor do campo deve ser do tipo string por padrão.
         self.value = str( self.value )
-
+        
         return self.value
 
 

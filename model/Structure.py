@@ -64,6 +64,9 @@ class Structure:
         # Fonte de dados administrável.
         self.link = link
 
+        # Referência do Middleware intermediador.
+        self.middleware = Middleware.Middleware()
+
         # Parametrizador administrável.
         self.parameters = parameters
         
@@ -83,15 +86,7 @@ class Structure:
 
         # Configuração dos callbacks.
         self._callback_progress = callback
-
-        # Inicializa o processamento de dados.
-        if settings.get('initialize', True):
-
-            # Mensagem de suporte.
-            self.logger.debug("Início da criação do objeto TreeData!")
-            
-            self.initialize()
-
+        
         return None
 
 
@@ -248,6 +243,8 @@ class Structure:
         Maps the <TreeData.Record> object to the internal controle variables.
         
         PARAMETER: record: <TreeData.Record> object.
+        
+        RETURNS: None.
         """
 
         # Controle geral.
@@ -315,6 +312,9 @@ class StructureConfigParser(Structure):
        
         # Invoca o inicializador da classe principal.
         Structure.__init__(self, *args, **kwargs)
+        
+        # Inicializa o processamento dos registros.
+        self.initialize()
 
         return None
 
@@ -430,6 +430,9 @@ class StructureTable(Structure):
        
         # Invoca o inicializador da classe principal.
         Structure.__init__(self, *args, **kwargs)
+        
+        # Inicializa o processamento dos registros.
+        self.initialize()
 
         return None
 
@@ -541,7 +544,10 @@ class StructureJSON(Structure):
         
         # Invoca o inicializador da classe principal.
         Structure.__init__(self, *args, **kwargs)
-
+        
+        # Inicializa o processamento dos registros.
+        self.initialize()
+        
         return None
 
 
@@ -642,6 +648,21 @@ class StructureJSON(Structure):
         return None
 
 
+    # Função criadora de registros.
+    def add(self, record_keyword, looping_vector, runtime_settings=None):
+        """
+        Process and adds record to <TreeData.Structure> from data.
+        
+        PARAMETER 1: record_keyword: Unique record identifier.
+        PARAMETER 2: looping_vector: Vector of data to be processed.
+        PARAMETER 3: runtime_settings: Custom settings.
+        
+        RETURNS: <List> Remaining unprocessed data.
+        """
+
+        return None
+
+
     def save(self):
         """
         Updates the <TreeData.Structure> while iterating over it's records.
@@ -686,6 +707,36 @@ class StructureLayout(Structure):
         # Invoca o inicializador da classe principal.
         Structure.__init__(self, *args, **kwargs)
 
+        # Regras de configuração da fonte de dados.
+        link_settings = self.rules.get('link').get('settings')
+
+        # Regras de configuração do layout.
+        layout_settings = link_settings.get('layout')
+
+        # Regras de configuração do registro.        
+        record_settings = link_settings.get('record')
+        
+        # Nome do arquivo de layout associado.
+        self.layout_name = layout_settings.get('file')
+
+        # Layout apropriado.
+        self.layout = self.middleware.layout(self.layout_name, self.parameters)
+        
+        # Palavra-Chave do registro no layout.
+        self.layout_keyword = record_settings.get('ID-prefix')
+        
+        # Tamanho de corte do identificador do registro.
+        self.record_ID_size = record_settings.get('ID-bytes', None)
+
+        # Corte adicional no offset do registro.
+        self.record_extra_offset = record_settings.get('extra-offset', 0)
+        
+        # Indica os bytes iniciais a serem ignorados.
+        self.skip_first_bytes = record_settings.get('skip-first-bytes', 0)
+        
+        # Inicializa o processamento dos registros.
+        self.initialize()
+        
         return None
 
 
@@ -706,14 +757,125 @@ class StructureLayout(Structure):
             self.link.handler.extend(record.vector)
 
         return True
-
         
+        
+    # Função criadora de registros.
+    def add(self, record_keyword, looping_vector, runtime_settings=None):
+        """
+        Process and adds record to <TreeData.Structure> from data.
+        
+        PARAMETER 1: record_keyword: Unique record identifier.
+        PARAMETER 2: looping_vector: Vector of data to be processed.
+        PARAMETER 3: runtime_settings: Custom settings.
+        
+        RETURNS: <List> Remaining unprocessed data.
+        """
+        
+        # Layout específico do registro.
+        record_layout = self.layout.records[record_keyword]
+
+        # Indica até onde deve ser cortado o vetor de códigos.
+        record_offset = record_layout['offset']
+            
+        # Offset total do vetor de códigos.
+        offset = record_offset + self.record_extra_offset
+
+        # Extração do vetor de códigos do registro catalogado.
+        record_vector = looping_vector[0: offset]
+
+        # Tamanho total do vetor de códigos extraído.
+        vector_length = len(self.link.handler)
+
+        # FEATURE-IMPROVE (Testes de uma parada ai. Vou consertar logo mais).
+        if runtime_settings:
+
+            # O registro consome TODO o vetor de códigos para encerrar o looping nesta iteração.
+            record_vector = looping_vector[:]
+
+        # Delega a criação do registro.
+        record = RecordLayout(record_vector, record_layout, self.parameters, runtime_settings)
+
+        # Permite que o Middleware realize tratativas no registro antes do preenchimento.
+        record = self.parameters.pre_standardize_record(record)
+            
+        # Vetor contendo o código dos campos a serem usados pelos campos.
+        working_vector = looping_vector[self.skip_first_bytes:] 
+            
+        # Para cada campo catalogado no layout.
+        for name in record.layout['fields']:
+
+            # Layout do campo.
+            field_layout = record.layout['fields'][name]
+
+            # Indica até onde deve ser cortado o vetor de códigos.
+            field_bytes = field_layout['bytes']
+
+            # Vetor de códigos do campo catalogado.
+            field_vector = working_vector[:field_bytes]
+
+            # FEATURE-IMPROVE (Testes de uma parada ai. Vou consertar logo mais).
+            if runtime_settings:
+
+                # O campo consome TODO o vetor de códigos do registro para encerrar o looping nesta iteração.
+                field_vector = working_vector[:]
+
+            # Delega a criação do campo.
+            field = FieldLayout(record, field_vector, field_layout, self.parameters, runtime_settings)
+
+            # Nome associado no layout.
+            field.name = field_layout['name']
+
+            # Tipo de dado.
+            field.type = field_layout['type']
+        
+            # Classe do dado.
+            field.clss = RecordLayout.DATA_TYPE
+
+            # FEATURE-IMPROVE (Template de formatação do dado).
+            field.template = field_layout.get('template', "")
+                
+            # Permite que o Middleware realize tratativas no campo criado.
+            field = self.parameters.standardize_field(field, settings={
+                'record': record
+            })
+
+            # Adiciona o campo criado ao controle.
+            record.fields[name] = field
+
+            # Adiciona referência as variáveis auxiliares.
+            record.fields_names[field.name] = field
+
+            # Chave estrangeira.
+            if field.foreign_key:
+
+                # Adiciona ao controle
+                record.fields_foreign_keys[field.foreign_key] = field
+
+            # Remove o código trabalhado do vetor para continuar a recursão.
+            working_vector = working_vector[field_bytes:]
+
+        # Informa o progresso da criação dos registros.
+        self.callback_progress({
+            "total": vector_length,
+            "value": vector_length - len(looping_vector)
+        })
+
+        # Permite que o Middleware realize tratativas no registro criado.
+        self.parameters.post_standardize_record(record)
+
+        # Mapeia as referências nos controles internos.
+        self.map_references(record)
+
+        # Remove o código trabalhado do vetor.
+        return looping_vector[offset:]
+
+
     def initialize(self):
         """
         Starts the required processes of the life-cycle boot.
         
-        1. Builds the structure of <TreeData.Records> and <TreeData.Fields> objects.
-        2. Standardizes the created objects according to the <TreeData.parameters>.
+        1. Builds the structure of <TreeData> Records and Fields objects.
+        2. Standardizes the objects according to the <TreeData.parameters>.
 
         RETURNS: None.
         """
@@ -721,132 +883,8 @@ class StructureLayout(Structure):
         # Vetor de códigos extraídos do arquivo.
         looping_vector = self.link.handler
 
-        # Referência do Middleware intermediador.
-        middleware = Middleware.Middleware()
-
-        # Nome do layout apropriado para os dados.
-        name = self.rules.get('link').get('settings').get('layout').get('file')
-
-        # Layout apropriado.
-        layout = middleware.layout(name, self.parameters)
-    
-        # Regras de configuração para o layout e registro.
-        layout_settings = self.rules.get('link').get('settings').get('layout')
-        record_settings = self.rules.get("link").get('settings').get('record')
-
-        # Palavra-Chave do registro no layout.
-        layout_keyword = record_settings.get("ID-prefix")
-        
-        # Tamanho de corte do identificador do registro.
-        record_ID_size = record_settings.get("ID-bytes", None)
-
-        # Corte adicional no offset do registro.
-        record_extra_offset = record_settings.get("extra-offset", 0)
-
         # Tamanho total do vetor de códigos extraído.
-        vector_length = len(self.link.handler)
-
-        # Função recursiva criadora de registros.
-        def build(record_keyword, looping_vector, runtime_settings=None):
-
-            # Regras de configuração específicas do registro.
-            record_settings = self.rules['link']['settings'].get("record")
-            
-            # Layout específico do registro.
-            record_layout = layout.records[record_keyword]
-
-            #print(record_layout)
-
-            # Indica até onde deve ser cortado o vetor de códigos.
-            record_offset = record_layout["offset"]
-
-            # Indica os bytes iniciais a serem ignorados.
-            skip_first_bytes = record_settings.get("skip-first-bytes", 0)
-            
-            # Offset total do vetor de códigos.
-            offset = record_offset + record_extra_offset
-
-            # Extração do vetor de códigos do registro catalogado.
-            record_vector = looping_vector[0: offset]
-
-            # FEATURE-IMPROVE (Testes de uma parada ai. Vou consertar logo mais).
-            if runtime_settings:
-
-                # O registro consome TODO o vetor de códigos para encerrar o looping nesta iteração.
-                record_vector = looping_vector[:]
-
-            # Delega a criação do registro.
-            record = RecordLayout(record_vector, record_layout, self.parameters, runtime_settings)
-
-            # Permite que o Middleware realize tratativas no registro antes do preenchimento.
-            record = self.parameters.pre_standardize_record(record)
-            
-            # Vetor contendo o código dos campos a serem usados pelos campos.
-            working_vector = looping_vector[skip_first_bytes:] 
-            
-            # Para cada campo catalogado no layout.
-            for name in record.layout["fields"]:
-
-                # Layout do campo.
-                field_layout = record.layout["fields"][name]
-
-                # Indica até onde deve ser cortado o vetor de códigos.
-                field_bytes = field_layout["bytes"]
-
-                # Vetor de códigos do campo catalogado.
-                field_vector = working_vector[:field_bytes]
-
-                # FEATURE-IMPROVE (Testes de uma parada ai. Vou consertar logo mais).
-                if runtime_settings:
-
-                    # O campo consome TODO o vetor de códigos do registro para encerrar o looping nesta iteração.
-                    field_vector = working_vector[:]
-
-                # Delega a criação do campo.
-                field = FieldLayout(record, field_vector, field_layout, self.parameters, runtime_settings)
-
-                # Nome associado no layout.
-                field.name = field_layout["name"]
-
-                # Tipo de dado.
-                field.type = field_layout["type"]
-        
-                # Classe do dado.
-                field.clss = RecordLayout.DATA_TYPE
-
-                # FEATURE-IMPROVE (Template de formatação do dado).
-                field.template = field_layout["template"]
-                
-                # Permite que o Middleware realize tratativas e consultas no campo criado.
-                field = self.parameters.standardize_field(field, settings={ 'record': record })
-
-                # Adiciona o campo criado ao controle.
-                record.fields[name] = field
-
-                # Adiciona referência as variáveis auxiliares.
-                record.fields_names[field.name] = field
-
-                if field.foreign_key:
-                    
-                    record.fields_foreign_keys[field.foreign_key] = field
-
-                # Remove o código trabalhado do vetor para continuar a recursão.
-                working_vector = working_vector[field_bytes:]
-
-            # Informa o progresso da criação dos registros.
-            self.callback_progress({
-                "total": vector_length,
-                "value": vector_length - len(looping_vector)
-            })
-
-            # Permite que o Middleware realize tratativas no registro criado.
-            self.parameters.post_standardize_record(record)
-
-            # Mapeia as referências nos controles internos.
-            self.map_references(record)
-
-            # Remove o código trabalhado do vetor para continuar a recursão.
-            return looping_vector[offset:]
+        vector_length = len(self.link.handler)        
 
         # Para cada registro.
         while True:
@@ -859,38 +897,42 @@ class StructureLayout(Structure):
                 break
 
             # Identificador do registro nos códigos.
-            record_ID = looping_vector[:record_ID_size]
+            record_ID = looping_vector[:self.record_ID_size]
             
             # Chave identificadora do registro.
-            record_keyword = layout_keyword
+            record_keyword = self.layout_keyword
 
             # Padroniza o identificador de acordo com os parâmetros.
-            if record_ID_size:
+            if self.record_ID_size:
 
                 # Identificador padronizado.
                 record_ID = self.parameters.standardize_recordID(record_ID)
 
                 # Identificador completo do registro.
-                record_keyword = layout_keyword + str(record_ID)
+                record_keyword = self.layout_keyword + str(record_ID)
 
             # Aplicação das regras ao registro catalogado no layout.
-            if record_keyword in layout.records:
+            if record_keyword in self.layout.records:
 
                 # Função recursiva.
-                looping_vector = build(record_keyword, looping_vector)
+                looping_vector = self.add(record_keyword, looping_vector)
                 
             # FEATURE-IMPROVE (Caso o registro não esteja conforme o layout).
             else:
 
+                # TAGGED
+                break
+                return None
+
                 # Em caso de erros controlados.
-                if record_settings.get("on-error", False):
+                if record_settings.get('on-error', False):
 
                     # FEATURE-IMPROVE (Configurações para criação de registro em tempo real).
                     runtime_settings = None
 
                     # Nome e tamanho do registro de erro.
-                    record_keyword = record_settings.get("on-error").get("fulfill-record")
-                    record_tobytes = record_settings.get("on-error").get("bytes", None)
+                    record_keyword = record_settings.get('on-error').get('fulfill-record')
+                    record_tobytes = record_settings.get('on-error').get('bytes', None)
 
                     # Caso o tamanho não seja específicado, consome todo o restante do vetor.
                     if not record_tobytes:
@@ -899,10 +941,10 @@ class StructureLayout(Structure):
                         record_tobytes = len(looping_vector)
 
                         # Configuração em tempo real.
-                        runtime_settings = dict(fields={ "dynamic-offeset": record_tobytes })
+                        runtime_settings = dict(fields={ 'dynamic-offeset': record_tobytes })
 
                     # Constrói o registro de erro.
-                    looping_vector = build(record_keyword, looping_vector, runtime_settings)
+                    looping_vector = self.add(record_keyword, looping_vector, runtime_settings)
 
                 # Em caso de erros não controlados.
                 else:
