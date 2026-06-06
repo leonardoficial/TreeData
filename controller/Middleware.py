@@ -7,21 +7,41 @@
 #                                                                             #
 ###############################################################################
 
-# Teste mobile.
 
-import os, re, sys, importlib.util, json, shlex, codecs, logging, uuid, pathlib
-
+import os
+import re
+import sys
+import uuid
+import json
+import shlex
+import codecs
+import pathlib
+import logging
+import importlib.util
 
 from pathlib import Path
 
 from configparser           import ConfigParser
-from importlib.machinery    import SourceFileLoader
 from importlib.util         import spec_from_loader, module_from_spec
+from importlib.machinery     import SourceFileLoader
 
-from treedata.model        import File, FileTable, SQLDatabase
-from treedata.model        import StructureTable, StructureJSON, StructureLayout, StructureConfigParser
+from treedata.model import (
+    File, 
+    FileTable, 
+    SQLDatabase
+)
 
-from treedata.util         import ExpressionService, FunctionService
+from treedata.model import (
+    StructureTable, 
+    StructureJSON, 
+    StructureLayout, 
+    StructureConfigParser
+)
+
+from treedata.util import (
+    FunctionService,
+    ExpressionService
+)
 
 
 # Padrão de Design usado para retornar a referência ao objeto já inicializado.
