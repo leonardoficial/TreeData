@@ -9,7 +9,10 @@
 
 
 # Bibliotecas padrões.
-import ast, json, uuid, logging
+import ast
+import json
+import uuid
+import logging
 
 # Bibliotecas próprias para serviços.
 from treedata.model import Bases
