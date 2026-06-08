@@ -9,7 +9,9 @@
 
 
 # Bibliotecas padrões.
-import os, logging, time
+import os
+import time
+import logging
 
 # Bibliotecas próprias para serviços.
 from issabox.services import StandardData
@@ -38,14 +40,19 @@ from issabox.views.StructureView import JSONViewer
 
 # Bibliotecas próprias para o projeto.
 from treedata              import TreeData
-from treedata.model        import File, FileTable, SQLDatabase
 from treedata.model        import Bases
+from treedata.model        import (
+    File, 
+    FileTable, 
+    SQLDatabase
+)
+
 from treedata.controller   import Middleware
 
 from treedata.view.components import (
     
-    FilterBox,          GotoBox,            SearchBox,
-    TaskSelectionBox,   TaskExecutionBox,
+    FilterBox, GotoBox, SearchBox,
+    TaskSelectionBox, TaskExecutionBox,
     SelectTable
 )
 
