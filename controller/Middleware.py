@@ -23,7 +23,7 @@ from pathlib import Path
 
 from configparser           import ConfigParser
 from importlib.util         import spec_from_loader, module_from_spec
-from importlib.machinery     import SourceFileLoader
+from importlib.machinery    import SourceFileLoader
 
 from treedata.model import (
     File, 
@@ -32,8 +32,8 @@ from treedata.model import (
 )
 
 from treedata.model import (
-    StructureTable, 
-    StructureJSON, 
+    StructureJSON,
+    StructureTable,
     StructureLayout, 
     StructureConfigParser
 )
@@ -44,9 +44,7 @@ from treedata.util import (
 )
 
 
-# Padrão de Design usado para retornar a referência ao objeto já inicializado.
-# Importante para o desempenho da aplicação visto que diversos arquivos podem usar o mesmo layout.
-
+# Padrão de design para retornar a referência ao objeto já inicializado.
 def singleton(_class):
     
     instances = {}
@@ -64,13 +62,25 @@ def singleton(_class):
 
 @singleton
 class Middleware:
-    '''
-    Classe responsável pelas seguintes operações:
-    PROC-1: Disponibilizar os arquivos de layouts e parâmetros, retornando o singleton por demanda.
-    '''
+    """
+    Handles loading of the custom components involved in constructing the models.
+    Acts as a controller for the outside logical and graphical system layers.
+    
+    1. Loads and saves reference to Parameter objets.
+    2. Loads and saves reference to Layout objets.
+    """
 
     def __init__(self, settings={}, extra_settings={}):
+        """
+        Creates variables used by the internal functions.
+        Starts the processes responsible for configuring the application.
 
+        PARAMETER 1: settings: Main configuration of the application.
+        PARAMETER 2: extra_settings: TAGGED:DEPRECIATED.
+
+        RETURNS: None.
+        """
+        
         # Sistema de logging configurado.
         self.logger = logging.getLogger("TreeData.Middleware")
 
@@ -99,15 +109,30 @@ class Middleware:
         # Lista os parametrizadores disponíveis.
         #self.availables = self.list_parameters(extra_settings)
 
+        return None
+
 
     @staticmethod
     def execute(this, path, globalss, context):
-        '''
-        Método responsável pelas seguintes operações:
-        PROC-1: Carregar o arquivo de tarefa informado pelo caminho.
-        PROC-2: TAGGED-IMPROVE: Descriptografar o arquivo de tarefa.
-        PROC-3: Executar a tarefa passando somente os contextos necessários.
-        '''
+        """
+        Creates variables used by the internal functions.
+        Starts the processes responsible for configuring the application.
+
+        1. Checks if path exists.
+        2. TAGGED: Loads and unzips the file.
+        3. TAGGED: Reads the file's content and checks for vulnerabilities.
+        5. Executes the script.
+
+        PARAMETER 1: this: TreeData Object reference.
+        PARAMETER 2: path: Full path of the script to be executed.
+        PARAMETER 3: globalss: Availables variables of the scope.
+        PARAMETER 4: context: Scope of execution of the script.
+
+        
+        RETURNS: Boolean False: Error during the process.
+        RETURNS: Boolean True: Process finished successfully.
+        RETURNS: Boolean None: Process could not finish.
+        """
 
         # Código da tarefa a ser executada.
         task_code = ""
