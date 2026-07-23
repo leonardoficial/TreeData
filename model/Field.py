@@ -12,7 +12,6 @@
 
 # Bibliotecas padrões.
 import ast
-import json
 import uuid
 import logging
 
