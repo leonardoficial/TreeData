@@ -4,7 +4,10 @@
 #   Rio de Janeiro, 12/09/1997
 
 
-import csv, datetime, json, os
+import csv
+import datetime
+import json
+import os
 
 from tkinter import *
 from tkinter import ttk

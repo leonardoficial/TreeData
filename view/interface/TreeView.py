@@ -33,7 +33,8 @@ from issabox.graphics import (
 
 from issabox.graphics.components import (
 
-    EditValueBox, EditComboBox
+    EditValueBox,
+    EditComboBox
 )
 
 from issabox.views.StructureView import JSONViewer
@@ -51,8 +52,11 @@ from treedata.controller   import Middleware
 
 from treedata.view.components import (
     
-    FilterBox, GotoBox, SearchBox,
-    TaskSelectionBox, TaskExecutionBox,
+    FilterBox,
+    GotoBox,
+    SearchBox,
+    TaskSelectionBox,
+    TaskExecutionBox,
     SelectTable
 )
 
