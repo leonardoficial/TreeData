@@ -26,7 +26,7 @@ class Field:
     """
 
     
-    def __init__(self, record, value, layout, parameters, settings={}):
+    def __init__(self, record, value, layout, parameters, settings=None):
         """
         Creates variables used by the internal functions.
         Starts the processes responsible for configuring the application.
@@ -55,8 +55,8 @@ class Field:
         # Regras específicas deste campo.
         self.this_rules = {}
 
-        # Configurações do objeto.
-        self.settings = settings
+        # Configurações.
+        self.settings = {} if settings is None else settings
 
         # Condicionais.
         self.conditionals = {}
@@ -190,7 +190,7 @@ class Field:
         return self.value
 
 
-    def _set(self, new_value, settings={}):
+    def _set(self, new_value, settings=None):
         """
         Main hidden method to set the field's value.
 
@@ -200,13 +200,15 @@ class Field:
         
         RETURNS: <Boolean> flag to indicate the result of the process.
         """
+
+        settings = {} if settings is None else settings
         
         self.value = new_value
 
         return True
 
 
-    def set(self, new_value, settings={}):
+    def set(self, new_value, settings=None):
         """
         Custom method to set the field's value.
 
@@ -219,6 +221,8 @@ class Field:
         
         RETURNS: Field's value.
         """
+
+        settings = {} if settings is None else settings
         
         # Invoca o método interno responsável pela configuração adequada.
         edition_result = self._set(new_value, settings)
@@ -284,7 +288,7 @@ class FieldJSON(Field):
         return None
 
 
-    def set(self, new_value, settings={}):
+    def set(self, new_value, settings=None):
         """
         Custom method to set the field's value.
 
@@ -297,6 +301,9 @@ class FieldJSON(Field):
         
         RETURNS: Field's value.
         """
+
+        # Configurações.
+        settings = {} if settings is None else settings
         
         # Invoca o método interno responsável pela configuração adequada.
         edition_result = self._set(str(new_value), settings)
@@ -318,7 +325,10 @@ class FieldJSON(Field):
     
     
     # TAGGED: Não cria novas chaves! Apenas atualiza as existentes.
-    def join(self, dictionary, settings={}):
+    def join(self, dictionary, settings=None):
+
+        # Configurações.
+        settings = {} if settings is None else settings
 
         for key, value in dictionary.items():
 
