@@ -44,7 +44,7 @@ from treedata.util import (
 )
 
 
-# Padrão de design para retornar a referência ao objeto já inicializado.
+# Padrão de design para retornar a referência do objeto já inicializado.
 def singleton(_class):
     
     instances = {}
@@ -60,7 +60,8 @@ def singleton(_class):
     return getinstance
 
 
-@singleton
+# TAGGED: Desativei a instanciação única do Middleware para permitir testes unitários.
+#@singleton
 class Middleware:
     """
     Handles loading of the custom components involved in constructing the models.
@@ -70,12 +71,12 @@ class Middleware:
     2. Loads and saves reference to Layout objets.
     """
 
-    def __init__(self, settings={}, extra_settings={}):
+    def __init__(self, settings=None, extra_settings={}):
         """
         Creates variables used by the internal functions.
         Starts the processes responsible for configuring the application.
 
-        PARAMETER 1: settings: Main configuration of the application.
+        PARAMETER 1: settings: Tree Data main module configuration.
         PARAMETER 2: extra_settings: TAGGED:DEPRECIATED.
 
         RETURNS: None.
@@ -84,8 +85,13 @@ class Middleware:
         # Sistema de logging configurado.
         self.logger = logging.getLogger("TreeData.Middleware")
 
-        # Referência às configurações da aplicação Tree Data.
-        self.settings = settings
+        # Referência às configurações do módulo principal Tree Data.
+        self.settings = {} if settings is None else settings
+
+        # As configurações devem ser um dicionário.
+        if not isinstance(self.settings, dict):
+
+            raise TypeError("The 'settings' parameter must be none or a dictionary.")
 
         # Variáveis para controle dos layouts.
         self.layouts_dict = {}
@@ -95,10 +101,10 @@ class Middleware:
         self.paramaters_dict = {}
         self.parameters_list = []
 
-        # Caminho do diretório de layouts.
+        # Caminho completo do diretório do arquivo.
         self.path = pathlib.Path(__file__).resolve().parent
 
-        # Caso não seja possível localizar o diretório de layouts,
+        # Caso não seja possível localizar o diretório.
         if not os.path.exists(self.path):
             
             # Mensagem para o suporte.
