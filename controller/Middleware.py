@@ -61,7 +61,7 @@ def singleton(_class):
 
 
 # TAGGED: Desativei a instanciação única do Middleware para permitir testes unitários.
-#@singleton
+@singleton
 class Middleware:
     """
     Handles loading of the custom components involved in constructing the models.
