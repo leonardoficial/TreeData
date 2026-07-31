@@ -9,7 +9,8 @@
 
 
 # Bibliotecas padrões.
-import uuid, logging
+import uuid
+import logging
 
 
 # Classe principal.

@@ -9,7 +9,10 @@
 
 
 # Bibliotecas padrões para serviços.
-import json, logging, os, pathlib
+import os
+import json
+import logging
+import pathlib
 
 # Bibliotecas próprias para o projeto.
 from treedata.controller import Middleware
@@ -122,6 +125,9 @@ class TreeData:
         
         # Configurações da aplicação.
         settings = {
+            "default-exports": {
+            		"csv": { "demiliter": "," }
+            	},
             "paths": {
                 "icons":        r"controller\icons",
                 "tasks":	r"controller\tasks",
@@ -157,8 +163,6 @@ class TreeData:
 
         # Diretório deste arquivo.
         folder_path = pathlib.Path(__file__).resolve().parent
-        
-        from tkinter import messagebox
 
         if path:
 
@@ -171,8 +175,6 @@ class TreeData:
         # Caminho padrão do arquivo de configurações principal.
         settings_path = os.path.join(settings_path, "settings.json")
         
-        #messagebox.showinfo(title='A', message=settings_path)
-
         # Tenta abrir o arquivo de configurações.
         try:
             
@@ -216,10 +218,6 @@ class TreeData:
                         folder_path = settings['path']
 
                     settings['paths'][key] = os.path.join(folder_path, settings['paths'][key])
-
-            #import json
-            #messagebox.showinfo(title='A', message=json.dumps(settings, indent=2))
-
                 
         except Exception:
 

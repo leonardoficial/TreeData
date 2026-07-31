@@ -7,26 +7,44 @@
 #                                                                             #
 ###############################################################################
 
-# Teste mobile.
 
-import os, re, sys, importlib.util, json, shlex, codecs, logging, uuid, pathlib
-
+import os
+import re
+import sys
+import uuid
+import json
+import shlex
+import codecs
+import pathlib
+import logging
+import importlib.util
 
 from pathlib import Path
 
 from configparser           import ConfigParser
-from importlib.machinery    import SourceFileLoader
 from importlib.util         import spec_from_loader, module_from_spec
+from importlib.machinery    import SourceFileLoader
 
-from treedata.model        import File, FileTable, SQLDatabase
-from treedata.model        import StructureTable, StructureJSON, StructureLayout, StructureConfigParser
+from treedata.model import (
+    File, 
+    FileTable, 
+    SQLDatabase
+)
 
-from treedata.util         import ExpressionService, FunctionService
+from treedata.model import (
+    StructureJSON,
+    StructureTable,
+    StructureLayout, 
+    StructureConfigParser
+)
+
+from treedata.util import (
+    FunctionService,
+    ExpressionService
+)
 
 
-# Padrão de Design usado para retornar a referência ao objeto já inicializado.
-# Importante para o desempenho da aplicação visto que diversos arquivos podem usar o mesmo layout.
-
+# Padrão de design para retornar a referência do objeto já inicializado.
 def singleton(_class):
     
     instances = {}
@@ -42,20 +60,38 @@ def singleton(_class):
     return getinstance
 
 
+# TAGGED: Desativei a instanciação única do Middleware para permitir testes unitários.
 @singleton
 class Middleware:
-    '''
-    Classe responsável pelas seguintes operações:
-    PROC-1: Disponibilizar os arquivos de layouts e parâmetros, retornando o singleton por demanda.
-    '''
+    """
+    Handles loading of the custom components involved in constructing the models.
+    Acts as a controller for the outside logical and graphical system layers.
+    
+    1. Loads and saves reference to Parameter objets.
+    2. Loads and saves reference to Layout objets.
+    """
 
-    def __init__(self, settings={}, extra_settings={}):
+    def __init__(self, settings=None, extra_settings={}):
+        """
+        Creates variables used by the internal functions.
+        Starts the processes responsible for configuring the application.
 
+        PARAMETER 1: settings: Tree Data main module configuration.
+        PARAMETER 2: extra_settings: TAGGED:DEPRECIATED.
+
+        RETURNS: None.
+        """
+        
         # Sistema de logging configurado.
         self.logger = logging.getLogger("TreeData.Middleware")
 
-        # Referência às configurações da aplicação Tree Data.
-        self.settings = settings
+        # Referência às configurações do módulo principal Tree Data.
+        self.settings = {} if settings is None else settings
+
+        # As configurações devem ser um dicionário.
+        if not isinstance(self.settings, dict):
+
+            raise TypeError("The 'settings' parameter must be none or a dictionary.")
 
         # Variáveis para controle dos layouts.
         self.layouts_dict = {}
@@ -65,10 +101,10 @@ class Middleware:
         self.paramaters_dict = {}
         self.parameters_list = []
 
-        # Caminho do diretório de layouts.
+        # Caminho completo do diretório do arquivo.
         self.path = pathlib.Path(__file__).resolve().parent
 
-        # Caso não seja possível localizar o diretório de layouts,
+        # Caso não seja possível localizar o diretório.
         if not os.path.exists(self.path):
             
             # Mensagem para o suporte.
@@ -79,15 +115,30 @@ class Middleware:
         # Lista os parametrizadores disponíveis.
         #self.availables = self.list_parameters(extra_settings)
 
+        return None
+
 
     @staticmethod
     def execute(this, path, globalss, context):
-        '''
-        Método responsável pelas seguintes operações:
-        PROC-1: Carregar o arquivo de tarefa informado pelo caminho.
-        PROC-2: TAGGED-IMPROVE: Descriptografar o arquivo de tarefa.
-        PROC-3: Executar a tarefa passando somente os contextos necessários.
-        '''
+        """
+        Creates variables used by the internal functions.
+        Starts the processes responsible for configuring the application.
+
+        1. Checks if path exists.
+        2. TAGGED: Loads and unzips the file.
+        3. TAGGED: Reads the file's content and checks for vulnerabilities.
+        5. Executes the script.
+
+        PARAMETER 1: this: TreeData Object reference.
+        PARAMETER 2: path: Full path of the script to be executed.
+        PARAMETER 3: globalss: Availables variables of the scope.
+        PARAMETER 4: context: Scope of execution of the script.
+
+        
+        RETURNS: Boolean False: Error during the process.
+        RETURNS: Boolean True: Process finished successfully.
+        RETURNS: Boolean None: Process could not finish.
+        """
 
         # Código da tarefa a ser executada.
         task_code = ""

@@ -14,11 +14,11 @@ import sys
 # Bibliotecas padrões para interfaces gráficas.
 from tkinter import messagebox
 
-# Bibliotecas próprias para interfaces gráficas.
-from treedata.view.interface import TreeView
-
 # Bibliotecas próprias para o projeto.
 from treedata import TreeData
+
+# Bibliotecas próprias para interfaces gráficas.
+from treedata.view.interface import TreeView
 
 
 # Caso executado com argumentos.
