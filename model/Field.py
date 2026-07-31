@@ -7,8 +7,6 @@
 #                                                                             #
 ###############################################################################
 
-# TESTE DA NOVA IDE
-
 
 # Bibliotecas padrões.
 import ast
@@ -32,7 +30,7 @@ class Field:
         Starts the processes responsible for configuring the application.
 
         PARAMETER 1: record: Related <TreeData.Record> object.
-        PARAMETER 2: value: Value.
+        PARAMETER 2: value: Value of the field.
         PARAMETER 3: layout: Layout used to fabricate the field.
         PARAMETER 4: parameter: <TreeData.Parameters> object.
         PARAMETER 5: settings: Custom configuration.
@@ -465,7 +463,7 @@ class FieldLayout(Field):
 
 
     # TAGGED: Melhorar o inglês.
-    def _set(self, new_vector, settings={}):
+    def _set(self, new_vector, settings=None):
         """
         Custom method to set the field's value.
 
@@ -479,6 +477,9 @@ class FieldLayout(Field):
         
         RETURNS: <Boolean> flag to indicate the result of the process.
         """
+
+        # Configurações.
+        settings = {} if settings is None else settings
         
         # Caso argumento fornecido para valor seja do tipo texto.
         if type(new_vector) is str:
