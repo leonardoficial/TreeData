@@ -1,8 +1,34 @@
 {
-	"associate": {},
-	"default-exports": {},
-	"associate": {
-		"^SRECORD.*TXT$": "SRECORD.json"
+	"-path": "C:\\Teste\\Tree Data",
+	"default-exports": {
+		"csv": { "demiliter": "," }
 	},
-	"file": {}
+	"associate": {
+		"^APP.*BIN$": 				"RIOCARD.APP (00.00).json",
+		"^PAR.*BIN$": 				"RIOCARD.PAR (00.00).json",
+		"^PRV.*BIN$":				"RIOCARD.PRV (00.00).json",
+		"^TPI.*BIN$":				"RIOCARD.TPI (00.00).json",
+		"^VALOP.*BIN$":				"RIOCARD.VALOP (00.00).json",
+		"^TG.*TXT$":    			"RIOCARD.TXT (00.00).json",
+		"^PASS.*.(PAS|PRC)$":		"RIOCARD.PASS (00.00).json",
+		"^L0207.*BIN$": 			"RIOCARD.L0 (02.07).json",
+		"^L0210.*BIN$": 			"RIOCARD.L0 (02.10).json",
+		"^L0211.*BIN$": 			"RIOCARD.L0 (02.11).json",
+		"^L0212.*BIN$": 			"RIOCARD.L0 (02.12).json",
+		"^L0213.*BIN$": 			"RIOCARD.L0 (02.13).json",
+		"^L0214.*BIN$": 			"RIOCARD.L0 (02.14).json",
+		"^Spark_Conf.ini$": 		"RIOCARD.SPARK_CONF.json",
+		"^super-data.csv$": 		"RIOCARD.SUPER-V3LAN.json",
+		"^T(G|R).*07\\.(3[6-9]|4[0-3])\\.BIN.*":       	"RIOCARD.TG-TR (07.36 - 07.43).json",
+		"^T(G|R).*45\\.(6[6-9]|7[0-5])\\.BIN.*":		"RIOCARD.TG-TR (45.66 - 45.75).json",
+		"^T(G|R).*45\\.(7[6-9]|8[0-9]|9[0-1])\\.BIN.*":	"RIOCARD.TG-TR (45.76 - 45.91).json",
+		"^T(G|R).*45\\.(9[2-5])\\.BIN.*":				"RIOCARD.TG-TR (45.92 - 45.95).json"
+	},
+	"file": {
+		".*BIN$":   { "type": "binary",  "mode": "rb", "saving-mode": "wb" },
+		".*BIN0$":  { "type": "binary",  "mode": "rb", "saving-mode": "wb" },
+		".*BIN1$":  { "type": "binary",  "mode": "rb", "saving-mode": "wb" },
+		".*PAS$":   { "type": "binary",  "mode": "rb", "saving-mode": "wb" },
+		".*PRC$":   { "type": "binary",  "mode": "rb", "saving-mode": "wb" }
+	}
 }

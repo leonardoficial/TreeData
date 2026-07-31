@@ -7,8 +7,6 @@
 #                                                                             #
 ###############################################################################
 
-# TESTE DA NOVA IDE
-
 
 # Bibliotecas padrões.
 import ast
@@ -26,13 +24,13 @@ class Field:
     """
 
     
-    def __init__(self, record, value, layout, parameters, settings={}):
+    def __init__(self, record, value, layout, parameters, settings=None):
         """
         Creates variables used by the internal functions.
         Starts the processes responsible for configuring the application.
 
         PARAMETER 1: record: Related <TreeData.Record> object.
-        PARAMETER 2: value: Value.
+        PARAMETER 2: value: Value of the field.
         PARAMETER 3: layout: Layout used to fabricate the field.
         PARAMETER 4: parameter: <TreeData.Parameters> object.
         PARAMETER 5: settings: Custom configuration.
@@ -55,8 +53,8 @@ class Field:
         # Regras específicas deste campo.
         self.this_rules = {}
 
-        # Configurações do objeto.
-        self.settings = settings
+        # Configurações.
+        self.settings = {} if settings is None else settings
 
         # Condicionais.
         self.conditionals = {}
@@ -190,7 +188,7 @@ class Field:
         return self.value
 
 
-    def _set(self, new_value, settings={}):
+    def _set(self, new_value, settings=None):
         """
         Main hidden method to set the field's value.
 
@@ -200,13 +198,15 @@ class Field:
         
         RETURNS: <Boolean> flag to indicate the result of the process.
         """
+
+        settings = {} if settings is None else settings
         
         self.value = new_value
 
         return True
 
 
-    def set(self, new_value, settings={}):
+    def set(self, new_value, settings=None):
         """
         Custom method to set the field's value.
 
@@ -219,6 +219,8 @@ class Field:
         
         RETURNS: Field's value.
         """
+
+        settings = {} if settings is None else settings
         
         # Invoca o método interno responsável pela configuração adequada.
         edition_result = self._set(new_value, settings)
@@ -284,7 +286,7 @@ class FieldJSON(Field):
         return None
 
 
-    def set(self, new_value, settings={}):
+    def set(self, new_value, settings=None):
         """
         Custom method to set the field's value.
 
@@ -297,6 +299,9 @@ class FieldJSON(Field):
         
         RETURNS: Field's value.
         """
+
+        # Configurações.
+        settings = {} if settings is None else settings
         
         # Invoca o método interno responsável pela configuração adequada.
         edition_result = self._set(str(new_value), settings)
@@ -318,7 +323,10 @@ class FieldJSON(Field):
     
     
     # TAGGED: Não cria novas chaves! Apenas atualiza as existentes.
-    def join(self, dictionary, settings={}):
+    def join(self, dictionary, settings=None):
+
+        # Configurações.
+        settings = {} if settings is None else settings
 
         for key, value in dictionary.items():
 
@@ -455,7 +463,7 @@ class FieldLayout(Field):
 
 
     # TAGGED: Melhorar o inglês.
-    def _set(self, new_vector, settings={}):
+    def _set(self, new_vector, settings=None):
         """
         Custom method to set the field's value.
 
@@ -469,6 +477,9 @@ class FieldLayout(Field):
         
         RETURNS: <Boolean> flag to indicate the result of the process.
         """
+
+        # Configurações.
+        settings = {} if settings is None else settings
         
         # Caso argumento fornecido para valor seja do tipo texto.
         if type(new_vector) is str:
