@@ -1,0 +1,51 @@
+{
+	"link": {
+		"DATA-API": "FILE",
+		"DATA-MAP": "JSON",
+		"settings": {					
+			"file": {
+				"opening-conversion": "json(data)",
+				"indent": 4
+			},
+			"record": {
+			},
+			"field": {
+				"dictionary": "JSON.json"
+			}
+		}
+    },
+	"view": {
+		"menu": {
+            "hide-http": false,
+            "hide-tools": false,
+            "hide-database": false,
+            "hide-explorer": false,
+            "hide-advanced": false,
+            "hide-settings": false,
+			"disable-task":	true,
+			"disable-goto":	false,
+			"disable-filter": false,
+			"disable-search": false,
+			"disable-file-saving": false,
+			"disable-file-saving-as": false
+		},
+		"record": {
+			"start-opened": false,
+			"disable-remove": true
+		},
+		"field": {
+			"disable-editing": false,
+			"enable-conversion": false
+		}
+	},
+	"task": {
+		"folder": "JSON",
+		"run-on": {
+			"default": {},
+			"startup": [],
+			"closing": []
+		}
+	},
+	"complex.records": {},
+	"complex.fields": {}
+}

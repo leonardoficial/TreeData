@@ -1,0 +1,66 @@
+{
+	"link": {
+		"DATA-API": "FILE",
+		"DATA-MAP": "LAYOUT",
+		"settings": {					
+			"file": {
+				"opening-conversion": "replace(data, '\\n', '')",
+				"-closing-conversion": ""
+			},
+			"layout": {
+				"file": "SRECORD.ini",
+				"name-keyword": "DESCRIPTION",
+				"enable-frozen-layout": true
+			},
+			"record": {
+				"ID-bytes": 2,
+				"ID-prefix": "RECORD",
+				"-ID-conversion": "decimal",
+				"representation": "vector",
+				"skip-first-bytes": 1,
+				"extra-offset": 1
+			},
+			"field": {
+				"ID-regex": "FIELD(\\d*)",
+				"conversion": "",
+				"variables": ["name", "override_bytes", "type"],
+				"dictionary": ""
+			}
+		}
+    },
+	"view": {
+		"menu": {
+            "hide-http": false,
+            "hide-tools": false,
+            "hide-database": false,
+            "hide-explorer": false,
+            "hide-advanced": false,
+            "hide-settings": false,
+			"disable-task":	false,
+			"disable-goto":	false,
+			"disable-filter": false,
+			"disable-search": false,
+			"disable-file-saving": false,
+			"disable-file-saving-as": false
+		},
+		"record": {
+			"start-opened": false,
+			"disable-remove": false
+		},
+		"field": {
+			"disable-editing": false,
+			"enable-conversion": true
+		}
+	},
+	"task": {
+		"folder": "",
+		"shared-folder": [],
+		"run-on-": {
+			"default": {},
+			"startup": [],
+			"closing": []
+		}
+	},
+	"complex.records": {},
+	"complex.fields": {}
+}

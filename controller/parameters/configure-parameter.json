@@ -1,0 +1,80 @@
+{
+    "name": "Configuracao de Parametro",
+    "link": {
+        "DATA-API": "FILE",
+        "DATA-MAP": "JSON",
+        "settings": {
+            "file": {
+                "opening-conversion": "json(data)",
+				"indent": 4
+            },
+            "record": {},
+            "field": {
+                "dictionary": "CONFIG-PARAMETERS.json"
+            }
+        }
+    },
+    "view": {
+		"destroy-on-close": true,
+        "disable-conversion": false,
+        "menu": {
+            "hide-database": true,
+            "hide-explorer": true,
+            "hide-http": true,
+            "hide-tools": true,
+            "hide-advanced": true,
+            "hide-settings": true,
+            "disable-file-saving": false,
+            "disable-file-saving-as": false
+        },
+        "record": {
+            "start-opened": true
+        },
+        "field": {
+            "disable-editing": true,
+            "disable-show-template": false
+        }
+    },
+    "task": {
+        "folder": "CONFIG-PARAMETERS",
+        "run-on": {
+            "default": {},
+            "startup": [],
+            "closing": []
+        }
+    },
+    "complex.records": {
+		"*": {
+			"conditionals": {
+				"if": "True",
+				"font": "gray"
+			}
+		}
+	},
+    "complex.fields": {
+        "DATA-API": {
+            "editor": "combobox",
+            "values": [
+                "FILE",
+                "SQL",
+                "REST"
+            ]
+        },
+        "DATA-MAP": {
+            "editor": "combobox",
+            "values": [
+                "INI",
+                "JSON",
+                "TABLE",
+                "LAYOUT"
+            ]
+        },
+        "disable-file-saving": {
+            "editor": "combobox",
+            "values": [
+                "True",
+                "False"
+            ]
+        }
+    }
+}
